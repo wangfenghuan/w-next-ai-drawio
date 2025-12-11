@@ -30,14 +30,7 @@
         "lint": "biome lint .",
         "format": "biome check --write .",
         "check": "biome ci",
-        "prepare": "husky",
-        "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:6002 && electron electron/main.js\"",
-        "electron:build": "npm run build && electron-builder",
-        "electron:build:mac": "npm run build && electron-builder --mac",
-        "electron:build:mac:universal": "npm run build && electron-builder --mac --universal",
-        "electron:build:dir": "npm run build && electron-builder --dir",
-        "electron:dist": "npm run build && electron-builder --publish=never",
-        "postinstall": "electron-builder install-app-deps"
+        "prepare": "husky"
     },
     "dependencies": {
         "@ai-sdk/amazon-bedrock": "^3.0.62",
@@ -106,15 +99,11 @@
         "@types/pako": "^2.0.3",
         "@types/react": "^19",
         "@types/react-dom": "^19",
-        "concurrently": "^9.1.2",
-        "electron": "^35.2.1",
-        "electron-builder": "^26.0.12",
         "eslint": "9.39.1",
         "eslint-config-next": "16.0.5",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.7",
         "tailwindcss": "^4",
-        "typescript": "^5",
-        "wait-on": "^8.0.3"
+        "typescript": "^5"
     }
 }
