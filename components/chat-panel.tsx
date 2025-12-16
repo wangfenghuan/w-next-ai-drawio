@@ -71,10 +71,8 @@ const TOOL_ERROR_STATE = "output-error" as const
 const DEBUG = process.env.NODE_ENV === "development"
 const MAX_AUTO_RETRY_COUNT = 3
 
-/**
- * Check if auto-resubmit should happen based on tool errors.
- * Only checks the LAST tool part (most recent tool call), not all tool parts.
- */
+// Determine if auto-resubmit should happen based on tool errors.
+// Only checks the LAST tool part (most recent tool call), not all tool parts.
 function hasToolErrors(messages: ChatMessage[]): boolean {
     const lastMessage = messages[messages.length - 1]
     if (!lastMessage || lastMessage.role !== "assistant") {
@@ -91,6 +89,33 @@ function hasToolErrors(messages: ChatMessage[]): boolean {
     }
 
     const lastToolPart = toolParts[toolParts.length - 1]
+
+    // Special handling for edit_diagram failures - be more lenient for user-friendly edits
+    if (
+        lastToolPart.toolName === "edit_diagram" &&
+        lastToolPart.state === TOOL_ERROR_STATE
+    ) {
+        // Allow retries for cell ID mismatches but limit to prevent infinite loops
+        const errorText = lastToolPart.errorText || ""
+        if (
+            errorText.includes("not found") ||
+            errorText.includes("ID mismatch")
+        ) {
+            console.log(
+                "[hasToolErrors] edit_diagram cell ID error, allowing retry",
+            )
+            return true
+        }
+        // For XML validation errors, be more restrictive
+        if (
+            errorText.includes("invalid XML") ||
+            errorText.includes("parse error")
+        ) {
+            console.log("[hasToolErrors] edit_diagram XML error, not retrying")
+            return false
+        }
+    }
+
     return lastToolPart?.state === TOOL_ERROR_STATE
 }
 
@@ -364,7 +389,7 @@ ${finalXml}
                             "[edit_diagram] Operation errors:",
                             errorMessages,
                             "Operations:",
-                            operations,
+                            JSON.stringify(operations, null, 2),
                         )
 
                         // Provide more user-friendly error message
@@ -379,6 +404,9 @@ ${finalXml}
                             toolCallId: toolCall.toolCallId,
                             state: "output-error",
                             errorText: `${userFriendlyMessage}
+
+**Attempted Operations:**
+${operations.map((op, i) => `${i + 1}. ${op.type.toUpperCase()} cell_id="${op.cell_id}"${op.new_xml ? ` with new content` : ""}`).join("\n")}
 
 Please try again with:
 1. A more specific edit request
@@ -405,12 +433,20 @@ Current diagram contains ${currentXml.match(/mxCell/g)?.length || 0} cells.`,
                             state: "output-error",
                             errorText: `Edit produced invalid XML: ${validationError}
 
-Current diagram XML:
+**Operations Attempted:**
+${operations.map((op, i) => `${i + 1}. ${op.type.toUpperCase()} cell_id="${op.cell_id}"`).join("\n")}
+
+**Invalid XML Preview:**
 \`\`\`xml
-${currentXml}
+${editedXml.substring(0, 500)}...
 \`\`\`
 
-Please fix the operations to avoid structural issues.`,
+Current diagram XML (for reference):
+\`\`\`xml
+${currentXml.substring(0, 1000)}...
+\`\`\`
+
+Please fix the operations to avoid structural issues or try regenerating the diagram.`,
                         })
                         return
                     }
@@ -1255,7 +1291,7 @@ Continue from EXACTLY where you stopped.`,
                         <div className="flex items-center gap-2">
                             <Image
                                 src="/favicon.ico"
-                                alt="Next AI Drawio"
+                                alt="W-Next AI Drawio"
                                 width={isMobile ? 24 : 28}
                                 height={isMobile ? 24 : 28}
                                 className="rounded"
@@ -1263,7 +1299,7 @@ Continue from EXACTLY where you stopped.`,
                             <h1
                                 className={`${isMobile ? "text-sm" : "text-base"} font-semibold tracking-tight whitespace-nowrap`}
                             >
-                                Next AI Drawio
+                                W-Next AI Drawio
                             </h1>
                         </div>
                         {!isMobile && (

@@ -1,4 +1,4 @@
-# Next AI Draw.io
+# W-Next AI Drawio
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 
 English | [中文](./docs/README_CN.md) | [日本語](./docs/README_JA.md)
 
-[![TrendShift](https://trendshift.io/api/badge/repositories/15449)](https://next-ai-drawio.jiang.jp/)
+[![TrendShift](https://trendshift.io/api/badge/repositories/15449)](https://w-next-ai-drawio.jiang.jp/)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Next.js](https://img.shields.io/badge/Next.js-16.x-black)](https://nextjs.org/)
@@ -26,7 +26,7 @@ https://github.com/user-attachments/assets/9d60a3e8-4a1c-4b5e-acbb-26af2d3eabd1
 
 
 ## Table of Contents
-- [Next AI Draw.io ](#next-ai-drawio-)
+- [W-Next AI Drawio ](#w-next-ai-drawio-)
   - [Table of Contents](#table-of-contents)
   - [Examples](#examples)
   - [Features](#features)
@@ -117,7 +117,7 @@ docker run -d -p 3000:3000 \
   -e AI_PROVIDER=openai \
   -e AI_MODEL=gpt-4o \
   -e OPENAI_API_KEY=your_api_key \
-  ghcr.io/dayuanjiang/next-ai-draw-io:latest
+  ghcr.io/wangfenghuan/w-next-ai-drawio:latest
 ```
 
 Or use an env file:
@@ -125,7 +125,7 @@ Or use an env file:
 ```bash
 cp env.example .env
 # Edit .env with your configuration
-docker run -d -p 3000:3000 --env-file .env ghcr.io/dayuanjiang/next-ai-draw-io:latest
+docker run -d -p 3000:3000 --env-file .env ghcr.io/wangfenghuan/w-next-ai-drawio:latest
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -139,8 +139,8 @@ Replace the environment variables with your preferred AI provider configuration.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/DayuanJiang/next-ai-draw-io
-cd next-ai-draw-io
+git clone https://github.com/wangfenghuan/w-next-ai-drawio
+cd w-next-ai-drawio
 ```
 
 2. Install dependencies:
@@ -184,7 +184,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 Or you can deploy by this button.
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDayuanJiang%2Fnext-ai-draw-io)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwangfenghuan%2Fw-next-ai-drawio)
 
 Be sure to **set the environment variables** in the Vercel dashboard as you did in your local `.env.local` file.
 
@@ -249,6 +249,6 @@ For support or inquiries, please open an issue on the GitHub repository or conta
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=DayuanJiang/next-ai-draw-io&type=date&legend=top-left)](https://www.star-history.com/#DayuanJiang/next-ai-draw-io&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=wangfenghuan/w-next-ai-drawio&type=date&legend=top-left)](https://www.star-history.com/#wangfenghuan/w-next-ai-drawio&type=date&legend=top-left)
 
 ---
