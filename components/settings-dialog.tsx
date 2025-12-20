@@ -248,6 +248,9 @@ export function SettingsDialog({
                                         <SelectItem value="qiniu">
                                             Qiniu (七牛云)
                                         </SelectItem>
+                                        <SelectItem value="kimi">
+                                            Kimi (月之暗面)
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -288,7 +291,10 @@ export function SettingsDialog({
                                                                 : provider ===
                                                                     "qiniu"
                                                                   ? "e.g., qiniu-deepseek-67b (or qiniu-deepseek-7b, qiniu-deepseek-14b, qiniu-llama-3-70b, qiniu-qwen-72b)"
-                                                                  : "Model ID"
+                                                                  : provider ===
+                                                                      "kimi"
+                                                                    ? "e.g., moonshot-v1-8k (or moonshot-v1-32k, moonshot-v1-128k)"
+                                                                    : "Model ID"
                                             }
                                         />
                                     </div>
@@ -340,7 +346,10 @@ export function SettingsDialog({
                                                                   : provider ===
                                                                       "qiniu"
                                                                     ? "QINIU_API_KEY"
-                                                                    : "server API key"}
+                                                                    : provider ===
+                                                                        "kimi"
+                                                                      ? "KIMI_API_KEY"
+                                                                      : "server API key"}
                                         </p>
                                     </div>
                                     <div className="space-y-2">
@@ -372,7 +381,10 @@ export function SettingsDialog({
                                                             : provider ===
                                                                 "qiniu"
                                                               ? "https://api.qiniucdn.com/v1"
-                                                              : "Custom endpoint URL"
+                                                              : provider ===
+                                                                  "kimi"
+                                                                ? "https://api.moonshot.cn/v1"
+                                                                : "Custom endpoint URL"
                                             }
                                         />
                                     </div>

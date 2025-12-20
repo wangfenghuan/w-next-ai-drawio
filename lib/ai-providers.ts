@@ -22,6 +22,7 @@ export type ProviderName =
     | "qwen"
     | "doubao"
     | "qiniu"
+    | "kimi"
 
 interface ModelConfig {
     model: any
@@ -50,6 +51,7 @@ const ALLOWED_CLIENT_PROVIDERS: ProviderName[] = [
     "qwen",
     "doubao",
     "qiniu",
+    "kimi",
 ]
 
 // Bedrock provider options for Anthropic beta features
@@ -368,6 +370,7 @@ const PROVIDER_ENV_VARS: Record<ProviderName, string | null> = {
     qwen: "QWEN_API_KEY",
     doubao: "DOUBAO_API_KEY",
     qiniu: "QINIU_API_KEY",
+    kimi: "KIMI_API_KEY",
 }
 
 /**
@@ -432,7 +435,7 @@ function validateProviderCredentials(provider: ProviderName): void {
  * Get the AI model based on environment variables
  *
  * Environment variables:
- * - AI_PROVIDER: The provider to use (bedrock, openai, anthropic, google, azure, ollama, openrouter, deepseek, siliconflow, glm, qwen, doubao, qiniu)
+ * - AI_PROVIDER: The provider to use (bedrock, openai, anthropic, google, azure, ollama, openrouter, deepseek, siliconflow, glm, qwen, doubao, qiniu, kimi)
  * - AI_MODEL: The model ID/name for the selected provider
  *
  * Provider-specific env vars:
@@ -456,6 +459,8 @@ function validateProviderCredentials(provider: ProviderName): void {
  * - DOUBAO_BASE_URL: Doubao/Ark endpoint (optional, defaults to https://ark.cn-beijing.volces.com/api/v3)
  * - QINIU_API_KEY: Qiniu API key
  * - QINIU_BASE_URL: Qiniu endpoint (optional, defaults to https://api.qiniucdn.com/v1)
+ * - KIMI_API_KEY: Kimi API key
+ * - KIMI_BASE_URL: Kimi endpoint (optional, defaults to https://api.moonshot.cn/v1)
  */
 export function getAIModel(overrides?: ClientOverrides): ModelConfig {
     // SECURITY: Prevent SSRF attacks (GHSA-9qf7-mprq-9qgm)
@@ -523,6 +528,7 @@ export function getAIModel(overrides?: ClientOverrides): ModelConfig {
                         `- OPENROUTER_API_KEY for OpenRouter\n` +
                         `- AZURE_API_KEY for Azure\n` +
                         `- SILICONFLOW_API_KEY for SiliconFlow\n` +
+                        `- KIMI_API_KEY for Kimi\n` +
                         `Or set AI_PROVIDER=ollama for local Ollama.`,
                 )
             } else {
@@ -748,9 +754,23 @@ export function getAIModel(overrides?: ClientOverrides): ModelConfig {
             break
         }
 
+        case "kimi": {
+            const apiKey = overrides?.apiKey || process.env.KIMI_API_KEY
+            const baseURL =
+                overrides?.baseUrl ||
+                process.env.KIMI_BASE_URL ||
+                "https://api.moonshot.cn/v1"
+            const kimiProvider = createOpenAI({
+                apiKey,
+                baseURL,
+            })
+            model = kimiProvider.chat(modelId)
+            break
+        }
+
         default:
             throw new Error(
-                `Unknown AI provider: ${provider}. Supported providers: bedrock, openai, anthropic, google, azure, ollama, openrouter, deepseek, siliconflow, glm, qwen, doubao, qiniu`,
+                `Unknown AI provider: ${provider}. Supported providers: bedrock, openai, anthropic, google, azure, ollama, openrouter, deepseek, siliconflow, glm, qwen, doubao, qiniu, kimi`,
             )
     }
 
