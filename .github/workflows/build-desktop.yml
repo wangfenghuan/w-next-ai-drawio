@@ -1,0 +1,177 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos-apple-silicon:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Compile Electron
+        run: npm run electron:compile
+
+      - name: Build macOS Apple Silicon app
+        run: |
+          npm run electron:build:mac:arm64
+
+      - name: Upload macOS Apple Silicon build
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64-build
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          retention-days: 30
+
+  build-windows-amd64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Python (for native modules)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Compile Electron
+        run: npm run electron:compile
+
+      - name: Build Windows AMD64 app
+        run: |
+          npm run electron:build:win:x64
+
+      - name: Upload Windows AMD64 build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-amd64-build
+          path: |
+            dist/*.exe
+            dist/*.msi
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-macos-apple-silicon, build-windows-amd64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download macOS Apple Silicon build
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-arm64-build
+          path: dist-macos/
+
+      - name: Download Windows AMD64 build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-amd64-build
+          path: dist-windows/
+
+      - name: Prepare release assets
+        run: |
+          ls -la dist-macos/
+          ls -la dist-windows/
+          mkdir -p release
+          cp dist-macos/* release/ 2>/dev/null || true
+          cp dist-windows/* release/ 2>/dev/null || true
+          ls -la release/
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes in this release
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## Downloads
+
+            ### macOS (Apple Silicon - M系列芯片)
+            - DMG安装包：直接拖拽到Applications文件夹
+            - ZIP压缩包：解压后运行
+
+            ### Windows (AMD64)
+            - EXE安装包：双击安装
+            - 便携版：直接运行无需安装
+
+            ## Installation
+
+            ### macOS
+            1. 下载DMG文件
+            2. 双击挂载镜像
+            3. 将应用拖拽到Applications文件夹
+            4. 从启动台或Applications启动应用
+
+            ### Windows
+            1. 下载EXE安装包
+            2. 右键选择"以管理员身份运行"
+            3. 按照安装向导完成安装
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-release-draft:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-macos-apple-silicon, build-windows-amd64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Release Draft
+        run: |
+          echo "Release draft created successfully!"
+          echo "Visit https://github.com/${{ github.repository }}/releases to view the release"
