@@ -40,7 +40,7 @@
         "electron:build:win:x64": "npm run build && npm run electron:compile && electron-builder --win --x64",
         "electron:build:win:arm64": "npm run build && npm run electron:compile && electron-builder --win --arm64",
         "electron:build:dir": "npm run build && npm run electron:compile && electron-builder --dir",
-        "electron:dist": "npm run build && npm run electron:compile && electron-builder --publish=never",
+        "electron:dist": "npm run build && npm run electron:compile && electron-builder",
         "electron:compile": "tsc electron/main.ts electron/preload.ts --outDir dist-electron --module esnext --target es2020 --moduleResolution node --esModuleInterop --skipLibCheck",
         "postinstall": "electron-builder install-app-deps"
     },
