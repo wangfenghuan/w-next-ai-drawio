@@ -2,6 +2,7 @@ appId: com.wangfenghuan.w-next-ai-drawio
 productName: W-Next AI Drawio
 directories:
   output: dist
+publish: never
 files:
   - out/**/*
   - dist-electron/**/*
